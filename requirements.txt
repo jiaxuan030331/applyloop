@@ -1,0 +1,12 @@
+# Python 3.10+ required (the code uses PEP 604 `X | None` annotations).
+
+PyYAML>=6.0          # config/profile.yaml
+python-docx>=1.1     # scripts/resume_build.py
+
+# The scrape phase runs inside the user's browser through Claude Code's Chrome
+# extension, so there is no HTTP client here on purpose: nothing in this repo
+# talks to LinkedIn directly.
+
+# Archived multi-source scrapers under scripts/legacy/ additionally wanted
+# requests, beautifulsoup4, lxml and python-dateutil. They are not on any live
+# path; install them only if you re-enable that code.

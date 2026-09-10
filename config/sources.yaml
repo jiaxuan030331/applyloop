@@ -1,0 +1,23 @@
+# Scraper config — read by the /scrape skill.
+#
+# Since the 2026-09-01 refactor this project is single-source LinkedIn,
+# driven interactively via Claude Code's Chrome extension against the user's
+# authenticated LinkedIn session. See `agents/DAILY_SCRAPER.md` for the full
+# protocol; runtime voyager parameters (time window, exp filter, concurrency)
+# live in that manual as a tuned-params table.
+#
+# Disabled multi-source config (greenhouse / lever / ashby / workday /
+# simplify / jobspy-linkedin) lives in `config/sources.disabled.yaml`. The
+# code paths that read it have been archived to `scripts/legacy/`.
+
+sources:
+  linkedin_browser:
+    enabled: true
+    location: "United States"          # geoId 103644278; hard-coded in voyager_search.js opts
+    queries:                            # add lines here to expand coverage; each becomes one voyager search
+      - "software engineer graduate"
+      - "machine learning engineer graduate"
+      - "data scientist new grad"
+      - "applied scientist new grad"
+      - "research engineer new grad"
+      - "ai engineer new grad"

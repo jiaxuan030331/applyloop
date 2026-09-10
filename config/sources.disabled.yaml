@@ -1,0 +1,47 @@
+# Disabled multi-source config, archived when the project went single-source
+# LinkedIn on 2026-09-01. Kept for reference in case someone wants to
+# re-enable the multi-source path (code lives in `scripts/legacy/`).
+#
+# To re-enable one of these:
+#   1. Restore the corresponding source under `sources:` in sources.yaml
+#   2. Un-archive the matching module from scripts/legacy/sources/
+#   3. Un-archive scripts/legacy/scrape.py (the multi-source orchestrator)
+#   4. Add a dedup key to the ingest path — jobs.csv is jid-keyed today, but
+#      non-LinkedIn sources have their own id conventions
+#
+# The disabled block below is the last state that was known to run against
+# the pre-refactor pipeline. It has NOT been maintained since; treat it as a
+# starting point, not a working config.
+
+sources:
+  simplify_new_grad:
+    enabled: false
+    listings_url: "https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/.github/scripts/listings.json"
+    max_age_days: 30
+    active_only: true
+
+  greenhouse:
+    enabled: false
+    fetch_full_jd: true
+
+  lever:
+    enabled: false
+    fetch_full_jd: true
+
+  ashby:
+    enabled: false
+    fetch_full_jd: true
+
+  workday:
+    enabled: false
+    fetch_full_jd: true
+    rate_sleep: 0.15
+
+  linkedin:  # jobspy-based; deprecated in favor of linkedin_browser
+    enabled: false
+    location: "United States"
+    hours_old: 720
+    results_per_query: 100
+    fetch_full_jd: true
+    li_at_cookie: ""
+    queries: []

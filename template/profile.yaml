@@ -1,0 +1,211 @@
+# Candidate profile — everything in the classifier that is about *you*.
+#
+# scripts/classify.py reads this at import. The regexes in that file encode
+# general facts about how job postings are written; everything here encodes
+# your situation: where you'd move, which employers you rate, what you're
+# paid enough for, what you specialise in. Fork the project, edit this file,
+# and the classifier follows you — you should not need to touch the code.
+#
+# Display names are shown in reports and on the board; write them in whatever
+# language you read.
+
+# ---------------------------------------------------------------- regions
+# Postings are bucketed by matching `location` against these patterns in
+# order; the first hit wins, and anything unmatched falls through to `other`.
+# `remote` matches a location that names no city at all.
+regions:
+  order: [A1, A2, A3]
+  other: A3
+  remote: A4
+  buckets:
+    A1:
+      name: "West Coast"
+      match: "\\b(CA|California|Washington|WA)\\b|San Francisco|Bay Area|Silicon Valley|Seattle|Bellevue|Redmond|Los Angeles|San Diego|San Jose|Santa Clara|Sunnyvale|Palo Alto|Mountain View|Cupertino|Menlo Park|San Mateo|Berkeley|Oakland|Irvine|Pasadena|Culver City|Santa Monica|Long Beach|Fremont|Milpitas|Redwood City|Foster City|Burlingame|Emeryville|El Segundo|Hawthorne|Torrance|Carlsbad|Sacramento|Campbell|Los Gatos"
+    A2:
+      name: "Northeast"
+      match: "\\b(NY|New York|NJ|New Jersey|CT|Connecticut|MA|Massachusetts|RI|Rhode Island|NH|New Hampshire|VT|Vermont|ME|Maine|PA|Pennsylvania|IL|Illinois|MI|Michigan|MN|Minnesota|WI|Wisconsin|OH|Ohio|IN|Indiana|MD|Maryland|DC|VA|Virginia|DE|Delaware)\\b|Boston|Cambridge|Chicago|Manhattan|Brooklyn|Jersey City|Hoboken|Philadelphia|Pittsburgh|Detroit|Ann Arbor|Minneapolis|Madison|Cleveland|Columbus|Cincinnati|Baltimore|Washington|Arlington|Reston|McLean|Bethesda|Princeton|Stamford|Greenwich|New Haven|Providence|Buffalo|Rochester|Albany|Newark|Trenton"
+    A3:
+      name: "Other US"
+      match: ""
+    A4:
+      name: "Nationwide / remote"
+      match: ""
+
+# ------------------------------------------------------------------- comp
+# `floor_usd` is a hard drop (X4): a posting whose *ceiling* is below it is
+# not paying enough to be worth an application. Bands are display only.
+comp:
+  floor_usd: 90000
+  # `max` is the INCLUSIVE top of the band; the band with no `max` is the top.
+  bands:
+    C0: {name: "undisclosed"}
+    C1: {name: "<100k",    max: 99999}
+    C2: {name: "100-200k", max: 200000}
+    C3: {name: ">200k"}
+  # Flag (not drop) a posting whose *floor* is at or above this — usually a
+  # sign the req is not really aimed at a new grad.
+  suspiciously_high_floor_usd: 400000
+
+# ------------------------------------------------------------------ tiers
+# How much you rate an employer. Names are matched case-insensitively against
+# the whole company string. Anything unlisted lands in the last tier.
+tiers:
+  unlisted: T5
+  academic: T4          # universities / hospitals / school districts
+  names:
+    T0: {name: "top labs"}
+    T1: {name: "big tech / top AI / top quant"}
+    T2: {name: "strong second tier"}
+    T3: {name: "large incumbent tech / finance"}
+    T4: {name: "consulting / defense / academic"}
+    T5: {name: "unrecognised"}
+  members:
+    T0:
+      - "openai"
+      - "anthropic"
+      - "google deepmind"
+    T1:
+      - "google"
+      - "meta"
+      - "amazon"
+      - "microsoft"
+      - "apple"
+      - "nvidia"
+      - "netflix"
+    T2:
+      - "stripe"
+      - "uber"
+      - "airbnb"
+      - "databricks"
+      - "palantir"
+      - "snowflake"
+    T3:
+      - "ibm"
+      - "oracle"
+      - "cisco"
+      - "intel"
+      - "goldman sachs"
+      - "jpmorganchase"
+    T4:
+      - "accenture"
+      - "deloitte"
+      - "pwc"
+      - "ey"
+      - "kpmg"
+
+# A starter list only. The real value of this file is the list you build over
+# months — every time a posting surprises you, put the company in the tier you
+# actually think it belongs to. Matching is exact and case-insensitive against
+# the whole company string, so add the variants a board actually prints
+# ("amazon web services (aws)" as well as "amazon").
+
+# ------------------------------------------------------------------ roles
+# Display names for the role buckets. The matching logic lives in
+# scripts/classify.py because it is about how job titles are written in
+# general — but `specialty` below is yours, and drives the D4 bucket.
+roles:
+  D1: {name: "big-co general hire (SDE and MLE pooled)"}
+  D2: {name: "SDE general"}
+  D3: {name: "MLE general"}
+  D4: {name: "your specialty"}
+  D5: {name: "applied AI / agents / forward-deployed"}
+  D6: {name: "ML infra"}
+  D7: {name: "search / ads / recsys"}
+  D8: {name: "other (risk, hardware, analytics…)"}
+
+# The thing you are actually good at — postings whose *title* names it get
+# their own bucket (D4) so they never get lost among general ML roles.
+specialty:
+  # Replace this with your own. Anything whose TITLE names it gets bucket D4,
+  # so the work you actually want never gets lost among generic ML reqs.
+  title_match: "\\b(speech|asr\\b|audio|voice|multi[- ]?modal|computer vision)\\b"
+  # A posting whose title doesn't name it still counts if the JD is saturated
+  # with these terms — this many separate mentions.
+  jd_match: "\\b(speech|asr|audio|voice|acoustic)\\b"
+  jd_threshold: 6
+
+# ----------------------------------------------------------------- campus
+campus:
+  E1: {name: "confirmed campus hire"}
+  E2: {name: "reads new-grad, never says so"}
+  E3: {name: "probably not new-grad"}
+
+# ------------------------------------------------------------------ drops
+# Every rule can be switched off. Turning one off keeps the postings it would
+# have removed, so you can see what a rule is costing you before deleting it.
+drops:
+  X2_clearance: true       # security clearance / TS-SCI / polygraph
+  X3_yoe: true             # explicit years-of-experience requirement
+  X4_comp: true            # ceiling below comp.floor_usd
+  X5_agency: true          # recruiting agency / outsourcer / gig-labelling
+  X6_intern: true          # internship / co-op / part-time
+  X7_senior: true          # senior / staff / principal / lead title
+  # "will not sponsor" is often boilerplate, and sometimes negotiable. Three
+  # settings: `drop` removes it, `flag` keeps it and marks it for you to weigh
+  # against how good the match is, `false` ignores the rule entirely. Pick
+  # `drop` only if your status makes it a genuine bar.
+  X8_no_sponsor: flag
+  X9_non_us: true          # posting is outside the US
+  X10_itar: true           # ITAR / export-control US-person requirement
+  # Max years of experience you can credibly claim. A JD asking for more is
+  # dropped by X3; a JD asking for exactly this many is flagged, not dropped.
+  max_yoe: 2
+
+# --------------------------------------------------------------- resumes
+# Frozen resume templates in resumes/. scripts/resume_build.py copies one and
+# tailors the copy; the templates themselves only change deliberately.
+# `stem` is the filename prefix — variants become <stem>_<variant>.docx.
+resumes:
+  stem: "<Your_Name>_Resume"
+  variants:
+    sde_ng:     "SDE_ng"
+    mle_ng:     "MLE_ng"
+    full:       "Full"
+  # Which template to reach for, by role bucket. /batch picks from this.
+  by_role:
+    D1: sde_ng
+    D2: sde_ng
+    D3: mle_ng
+    D4: mle_ng
+    D5: mle_ng
+    D6: mle_ng
+    D7: mle_ng
+    D8: sde_ng
+
+# Human-readable labels. These land in jobs.csv (drop_reason, flags) and in
+# the daily report, so write them in whatever language you read.
+labels:
+  drops:
+    X1: "duplicate"
+    X2: "clearance required"
+    X3: "needs {n}+ yrs"          # {n} = the years the JD actually asks for
+    X4: "ceiling ${k}k"      # {k} = the ceiling in thousands
+    X5: "agency / spam"
+    X6: "internship / part-time"
+    X7: "senior title"
+    X8: "will not sponsor"
+    X9: "outside the US"
+    X10: "ITAR/US-person"
+  flags:
+    agency: "agency?"
+    phd: "PhD?"
+    thin_jd: "thin JD"
+    at_yoe_limit: "at YoE limit"
+    high_floor: "floor too high?"
+    itar: "ITAR?"
+    no_sponsor: "no_sponsor?"
+
+# Companies that are never worth an application — recruiting agencies,
+# outsourcers, crowd-labelling platforms, and accounts that spam the board.
+# Matched as a whole-string, case-insensitive equality against `company`.
+blocked_companies:
+  # Seed it with the obvious ones; add a name the first time one wastes an
+  # hour of yours. These are matched exactly, case-insensitively.
+  - "jobright.ai"
+  - "dataannotation"
+  - "teksystems"
+  - "infosys"
+  - "capgemini"
+  - "cognizant"
+  - "robert half"
+  - "insight global"

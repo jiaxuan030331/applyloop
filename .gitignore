@@ -1,0 +1,39 @@
+# This becomes the .gitignore of a fresh clone.
+#
+# The files you fill in from template/ describe you: your address, your work
+# authorisation, your self-identification answers, and a record of everywhere
+# you have applied. They are ignored here so that `git add -A` cannot publish
+# them by accident. If you want them versioned, use a PRIVATE repository.
+#
+# (.gitignore does not support trailing comments — a pattern must own its line.)
+
+# ---- your files, filled in from template/ ----
+config/profile.yaml
+experiences.md
+application_answers.md
+rulebook.md
+claimable_skills.md
+platform_notes.md
+
+# ---- the ledger and everything derived from it ----
+jobs.csv
+data/board.json
+data/pending/
+data/daily_reports/
+data/raw/
+data/archive/
+application_records/
+
+# ---- resumes and documents ----
+resumes/
+transcripts/
+*.docx
+*.pdf
+
+# ---- backups / scratch ----
+*.bak-*
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.DS_Store

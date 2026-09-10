@@ -1,0 +1,202 @@
+# Target companies grouped by ATS platform. The scraper hits the public
+# board API for each. Add / remove freely; the daily agent will suggest
+# additions based on shortlist hits and market signal.
+#
+# Board slug conventions:
+#   greenhouse: slug from https://boards.greenhouse.io/<slug>
+#   lever:      slug from https://jobs.lever.co/<slug>
+#   ashby:      slug from https://jobs.ashbyhq.com/<slug>
+#
+# Only include companies you'd actually want to work at. Start small; grow.
+
+# Verified counts are as of the last probe (2026-09-01). Actual jobs
+# fetched will be much smaller after filtering.
+
+greenhouse:
+  # ---- originally curated ----
+  - anthropic       # 568
+  - databricks      # (in config since start)
+  - stripe          # 582
+  - airbnb          # 170
+  - reddit          # 156
+  - discord         # 51
+  - pinterest       # 208
+  - dropbox         # 42
+  - roblox          # 226
+  - figma           # 161
+  - notion          # (also on Ashby now — dedup handles)
+  # ---- added from probe 2026-09-01 (big ATS presence) ----
+  - datadog         # 455
+  - mongodb         # 405
+  - waymo           # 350
+  - elastic         # 342
+  - okta            # 342
+  - cloudflare      # 315
+  - onemedical      # 308  (health)
+  - toast           # 300
+  - brex            # 294
+  - xai             # 253
+  - point72         # 236  (fund)
+  - janestreet      # 232  (fund)
+  - adyen           # 228
+  - gitlab          # 222
+  - affirm          # 200
+  - block           # 193
+  - coinbase        # 189
+  - imc             # 174  (fund)
+  - clickhouse      # 173
+  - flexport        # 171
+  - epicgames       # 167
+  - riotgames       # 164
+  - wayve           # 154  (AV)
+  - twilio          # 137
+  - grafanalabs     # 134
+  - ripple          # 128
+  - robinhood       # 128
+  - wizinc          # 125  (security)
+  - figureai        # 123  (humanoid)
+  - asana           # 119
+  - instacart       # 117
+  - worldquant      # 104  (fund)
+  - nuro            # 101  (AV)
+  - vercel          # 89
+  - mixpanel        # 83
+  - motional        # 71   (AV)
+  - chime           # 65
+  - faire           # 65
+  - cribl           # 63
+  - cloverhealth    # 62   (health)
+  - mercury         # 54
+  - fastly          # 50
+  - launchdarkly    # 50
+  - twitch          # 49
+  - peloton         # 46
+  - flowtraders     # 43   (fund)
+  - pagerduty       # 43
+  - gemini          # 39
+  - huntress        # 38   (security)
+  - amplitude       # 37
+  - flatironhealth  # 30   (health)
+  - arizeai         # 28   (ML observability)
+  - webflow         # 28
+  - cockroachlabs   # 27
+  - alloy           # 22
+  - starburst       # 22
+  - wise            # 21
+  - ginkgobioworks  # 19   (biotech)
+  - airtable        # 16
+  - assemblyai      # 15   (speech!)
+  - figure          # 15   (humanoid)
+  - recursionpharmaceuticals  # 14
+  - yugabyte        # 14
+  - planetscale     # 11
+  - doximity        # 10
+  - fellow          # 9
+  - expel           # 6
+  - instabase       # 6
+  - matic           # 5
+  - circleci        # 4
+  - quadraturecapital  # 4
+  - stabilityai     # 4
+  - spacex          # (added per user request; verify jobs count)
+
+lever:
+  # ---- originally ----
+  - palantir
+  # ---- added from probe ----
+  - gopuff          # 762
+  - lyrahealth      # 545 (mental health)
+  - zoox            # 244 (AV)
+  - includedhealth  # 149
+  - spotify         # 86
+  - ro              # 48
+  - neon            # 13
+  - alloy           # 7
+
+ashby:
+  # ---- originally ----
+  - openai
+  - perplexityai
+  - runwayml
+  - anysphere
+  - suno
+  - deepgram
+  - elevenlabs
+  - captions
+  - mercor
+  # ---- added from probe 2026-09-01 ----
+  - snowflake       # 382
+  - applied         # 307 (Applied Intuition)
+  - clickhouse      # 173 (also on GH; dedup handles)
+  - wayve           # 152 (also on GH)
+  - cohere          # 144 (LLM)
+  - ramp            # 137
+  - notion          # 133 (also on GH)
+  - skydio          # 129 (drones)
+  - cursor          # 119 (was `anysphere` — try both)
+  - cerebras        # 108 (ML compute)
+  - helion          # 101 (fusion)
+  - plaid           # 100
+  - commure         # 74
+  - socure          # 86
+  - clickup         # 67
+  - fireworks       # 67  (LLM inference)
+  - temporal        # 60
+  - supabase        # 59
+  - rho             # 47
+  - supercell       # 43  (gaming)
+  - sentry          # 40
+  - miro            # 36
+  - physicalintelligence  # 34  (robotics)
+  - cartesia        # 33  (speech!)
+  - render          # 33
+  - modal           # 31  (ML infra)
+  - camunda         # 30
+  - poshmark        # 30
+  - hex             # 28
+  - linear          # 28
+  - confluent       # 23
+  - insitro         # 16  (drug discovery ML)
+  - midjourney      # 16
+  - poolside        # 15  (LLM coding)
+  - character       # 13  (character.ai)
+  - posthog         # 13
+  - pika            # 10  (video gen)
+  - circle          # 8
+  - moderntreasury  # 8
+  - prefect         # 8
+  - railway         # 8
+  - pinecone        # 7   (vector db)
+  - zapier          # 7
+  - neon            # 6
+  - quora           # 6
+  - materialize     # 5
+  - cedar           # 3
+
+# Workday tenants.
+#
+# HOW TO ADD A COMPANY:
+#   1. Open their public careers site in a browser.
+#   2. Look for a URL of the form:
+#        https://{tenant}.wd{POD}.myworkdayjobs.com/{site}/
+#      or open DevTools → Network → search for "myworkdayjobs.com" while
+#      loading their listings page.
+#   3. Extract tenant, pod (the number after "wd"), and site slug.
+#   4. Add an entry below.
+#
+# NOTE: many companies people expect on Workday are NOT there:
+#   - Uber, Amazon, Apple, Netflix, Microsoft, TSMC → custom portals
+#   - Intuit, Cisco → Workday backend but proxied behind their own domain,
+#     the raw Workday URL isn't publicly guessable; you'd need to inspect
+#     network traffic on their careers page to find it.
+#
+# Optional per-entry: query (default ""), max_pages (default 20).
+
+workday:
+  # ---- verified working (probed 2026-09-01) ----
+  - {name: salesforce, tenant: salesforce, pod: 12, site: External_Career_Site}
+  - {name: nvidia,     tenant: nvidia,     pod: 5,  site: NVIDIAExternalCareerSite}
+  - {name: micron,     tenant: micron,     pod: 1,  site: External}
+  - {name: trendmicro, tenant: trendmicro, pod: 3,  site: External}
+  - {name: caci,       tenant: caci,       pod: 1,  site: External}    # 1753 postings
+  - {name: regeneron,  tenant: regeneron,  pod: 1,  site: Careers}     # 580 postings
