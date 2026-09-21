@@ -37,3 +37,9 @@ __pycache__/
 .venv/
 .env
 .DS_Store
+
+# ---- author's local workspaces: the LIVE system and the v1 prototype ----
+# They hold real ledgers, application records and tailored resumes.
+# Never in this public repo; version them in a PRIVATE repository.
+chrome_in_claude_assistant/
+ng application/

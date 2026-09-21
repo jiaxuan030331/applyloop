@@ -1,120 +1,71 @@
 # applyloop
 
-A job search run as a pipeline, by two AI agents and one person.
+A job search run with AI — first as a pipeline, then as an assistant.
+Two generations live in this repo, and the distance between them is the
+most useful thing here.
 
-One agent finds and files openings. Another works through applications and
-stops before every submit. You decide what gets applied to — and every time
-you reject something and say why, that reason becomes a filter rule, so the
-next batch is better than the last. That loop is the point, and the name.
+**v1** (this directory) scraped LinkedIn daily, deduped, filtered and
+bucketed every posting into a board, and drove a fill assistant from it.
+It worked, and its own ledger showed why it was wrong: 1,488 postings
+ingested, 69% bottom-tier, 933 rows nobody ever acted on, and a feedback
+loop with working code and zero data. Automating *recall* produced volume,
+not signal — and the careful work drowned in it.
 
-```
-  scrape ──▶ filter & bucket ──▶ jobs.csv ──▶ board ──▶ batch ──▶ you decide
-                    ▲                                                │
-                    └──────── your reasons become rules ─────────────┘
-```
+**v2** ([`v2/`](v2/)) inverts the division of labor: the human does recall
+(a LinkedIn *Saved* list, five at a time), the model does the careful
+reading under written rules it must re-read every session, and small shell
+scripts hold the invariants — append-only ledger, resume-diff whitelists,
+three-way consistency audits. Four prompt files and ~300 lines of shell
+replaced most of the pipeline, and throughput roughly doubled.
 
-Built on [Claude Code](https://claude.com/claude-code). Currently
-single-source (LinkedIn, through your own browser session), single-user, and
-in daily use.
+| | start here |
+|---|---|
+| the job-search **method** (kill rules, outreach, resume protocol) | [v2/PLAYBOOK.md](v2/PLAYBOOK.md) *(中文)* |
+| the v2 **design story** — what v1's data said, what was cut, what it cost | [v2/README.md](v2/README.md) |
+| **adopt it** yourself | [v2/SETUP.md](v2/SETUP.md) *(中文)* |
+| the v1 pipeline's design rationale, kept honest | [DESIGN.md](DESIGN.md) |
 
-- **[SETUP.md](SETUP.md)** — what you need and how to make it yours
-- **[DESIGN.md](DESIGN.md)** — why it is built this way, including what is
-  still wrong with it
+Built on [Claude Code](https://claude.com/claude-code). Single-user, in
+daily use; v2 is current, v1 is archived in place and still runnable.
 
-## The two agents
+## What both generations refuse to do
 
-| | Entry point | Does | Writes |
-|---|---|---|---|
-| **Scrape & ingest** | `/scrape [24h\|3d]` | pulls the day's postings, dedups, filters, buckets, reports | new ledger rows, the board, a daily report |
-| **Fill assistant** | `/batch <what you want>` | probes each posting, reports, waits for you, tailors a résumé, fills the form | application status, tailored documents |
-| **You** | — | decide | anything, via `update_row.py` |
+**Never submits.** Forms get filled; the last click is the human's.
 
-They are separate Claude Code sessions on purpose. Scraping is high-volume and
-mechanical; filling an application is one posting read carefully, with a dozen
-judgement calls. Running both in one agent means the careful work happens in a
-context window already full of job listings.
+**Never invents.** Nothing reaches a resume or a form that is not
+traceable to a recorded fact. In v2 this is two script-checked boundaries:
+sentences must come from the material library (verbatim at L2; verb-level
+bounded rewrites at L3), and every technical term must exist in an
+append-only "skills I actually have" list.
 
-## The ledger
+**Answers honestly.** Work-authorization and sponsorship questions get the
+true answer, always — even when that is what a filter screens for.
 
-`jobs.csv` is the source of truth — every posting ever seen, what was decided
-about it, and why. Rejected rows are never deleted, only marked, so a rule
-change can be audited against what it would have discarded.
+## The lesson, in one table
 
-`data/board.json` — what the fill assistant selects from — is *derived* from
-it: exactly the rows still open. Retiring a posting means giving it a status,
-never editing the board.
+| | v1 | v2 |
+|---|---|---|
+| recall | scraper + classifier + 5-axis buckets | human's Saved list; optional scout that pre-kills only the certain noes |
+| judgment | regex rules; an LLM score column that stayed empty | the model, under prose rules with a feedback loop into them |
+| invariants | scattered through pipeline code | `job.sh` / `tailor_check.sh` / `audit.sh` |
+| result (per active day) | ~4.6 applications | ~17 applications, tailored resumes included |
 
-```bash
-python3 scripts/update_row.py drop   <id> -m "why"   # reject, with a reason
-python3 scripts/update_row.py lowfit <id> -m "why"   # off the board, not a rejection
-python3 scripts/update_row.py reasons                # read your reasons back
-```
+The rules that survived the rewrite: the ledger is append-only and
+authoritative; every rejection carries a reason and reasons become rules;
+truthfulness boundaries are file lookups, never judgment calls.
 
-## Filtering and bucketing
-
-Ten coarse rules drop what you could not or would not take — clearance, export
-control, senior titles, years of experience, pay below your floor, agencies,
-internships, non-US postings, duplicates. Everything that survives is bucketed
-five ways: region, employer tier, pay band, direction of the work, and how
-confident we are the req is actually open to someone at your level.
-
-Buckets rather than a single fit score, because the question you have is not
-"is this a 4?" but "show me campus-confirmed ML infrastructure roles at strong
-companies on the west coast" — five orthogonal dimensions answer that and a
-scalar cannot.
-
-Rules are deliberately blunt. When one could go either way it keeps the
-posting and attaches a flag, because reading one extra row costs a minute and
-missing a job you would have taken costs a cycle.
-
-The rules live in `scripts/classify.py`; everything about *you* —  which
-employers you rate, where you would move, what pay is worth an hour, what you
-specialise in — lives in `config/profile.yaml`. Forking should mean editing
-YAML, never regexes.
-
-## What it will not do
-
-**It never submits.** The fill assistant fills a form and stops. The last
-click is yours.
-
-**It never invents.** Nothing reaches a résumé or a form that is not traceable
-to `experiences.md` (things you have done, with evidence) or
-`claimable_skills.md` (skills you hold that no bullet spells out). The
-boundary is a file lookup, not a judgement call — which is what stops a
-tailoring pass from drifting into fabrication one plausible sentence at a
-time.
-
-**It answers honestly.** Work-authorisation and sponsorship questions get the
-true answer, always, even when that is what a filter is screening for.
-
-## Layout
+## v1 layout (archived)
 
 ```
-jobs.csv                  the ledger
-rulebook.md               rules, with the reasoning and a change log
-experiences.md            what you have done — the boundary on every claim
-config/profile.yaml       everything about you that the classifier needs
-
-scripts/
-  classify.py             filter and bucket rules (pure functions)
-  ingest.py               handoff → dedup → classify → ledger → report
-  board.py                ledger → board
-  update_row.py           the only sanctioned writer
-  reclassify.py           replay rules over history after a change
-  export_public.py        build the shareable tree, by whitelist
-  legacy/                 pre-2026-09-01 multi-source code, not on any path
-
-template/                 fillable versions of the five personal files
-agents/                   the two operating manuals
-tests/                    coverage on the classifier
+jobs.csv                the ledger        agents/     the two operating manuals
+rulebook.md             rules + changelog scripts/    classify / ingest / board / export
+config/profile.yaml     the candidate     template/   fillable personal files
+DESIGN.md               why, incl. what was wrong     tests/      classifier coverage
 ```
 
-## Status and limits
-
-Single-source and single-user. The scraping runs against LinkedIn's internal
-API from inside your own logged-in browser — a grey area, discussed honestly
-in [SETUP.md](SETUP.md#scraping-honestly). No scraped data ships with this
-repo. The tier list and role buckets encode one person's view of the market;
-the mechanism generalises, the starting values do not.
+v1's scraping ran against LinkedIn's internal API from inside the user's
+own logged-in browser — a grey area discussed honestly in
+[SETUP.md](SETUP.md#scraping-honestly) and inherited knowingly by v2's
+scout (same stop-on-401, same pacing, no shipped data).
 
 MIT licensed.
