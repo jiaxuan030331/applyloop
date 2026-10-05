@@ -60,24 +60,29 @@ Three v1 ideas survived, generalized:
 ## Architecture
 
 ```
- /scout Nd ──▶ voyager search ──▶ evidence-row screening ──▶ click *Save*
-                                        (JD never enters context)      │
-                                                                       ▼
-                                                          LinkedIn Saved list
-                                                                       │
- /saved-jobs-triage ◀──── 5 at a time, tabs left on the apply page ────┘
-        │  fact cards (facts only — no scores, no verdicts)
+ /scout Nd ─▶ voyager search ─▶ scout.py: dedup · blacklist · title/yoe/closed/stale rules
+                (browser only fetches;        │
+                 results go to disk)          ▼
+                                   parallel judge subagents (≤30 evidence rows each)
+                                   0 → queue · −1 → human picks · ≤−2 → drop
+                                              │
+ /saved-jobs-triage ◀── 5 at a time, tabs left on the apply page ─┘
+        │  fact cards; ledger records only "seen"
         ▼
-   the human decides ──▶ /job-apply ──▶ tier A: apply + message   ──▶ ledger
-                              │         tier B: ask first, 5-day timer
-                              ▼
-                        /resume-tailor  (L1 skills-line / L2 structure /
-                                         L3 reword — script-audited)
+   the human ──▶ /job-apply ──▶ on request: /resume-tailor · form answers · reach out
+                                                          (find the HM, or ask for a ref link)
+        ▲
+        │  weekly
+ /inbox ─▶ read-only Gmail: rejections · OAs (auto vs. real) · interviews
+        │      ─▶ email_signals.tsv ─▶ market-feedback report
+        └────▶ interview signal ─▶ interview_hub/actual_interviews/<role>/
+                                     (context + JD + resume → a voice mock-interview agent)
 ```
 
-State lives in flat files: `ledger/jobs.tsv` (append-only), `cards/`
-(fact-card cache), `applications/` (immutable records), `outreach/`
-(message archive). `bin/job.sh` is the only sanctioned query/write path —
+State lives in flat files: `ledger/jobs.tsv` (append-only; records only
+that a posting was *seen*), `ledger/email_signals.tsv` (outcomes from the
+inbox), `cards/` (fact-card cache), `applications/` (written only when a
+resume was tailored), `outreach/` (messages, written on request). `bin/job.sh` is the only sanctioned query/write path —
 `lookup` dedups by key, URL, *and* the long numeric id inside the URL
 (job boards expose the same req under multiple URL shapes).
 
@@ -110,13 +115,76 @@ mechanism, not a reminder:
 | failure | mechanism |
 |---|---|
 | resume produced, no record written | the tailor now writes a stub record itself when invoked directly |
-| "did you submit?" never answered | silence-means-applied bookkeeping + a `pending` roll-call verb |
+| "did you submit?" never answered | silence-means-applied + a `pending` roll-call — *later abandoned, see below* |
 | same req, two ids | URL + numeric-id normalization in `lookup` |
 | free-text status values | enum validation in `check` |
 
 Count after: 0. The general lesson matches v1's: **a rule that lives only
 in prose is a rule nobody can check.** v2 keeps judgment in prose and
 moved every checkable invariant into scripts.
+
+## Closing the loop (week 3)
+
+v1's README ends on the number that mattered most: *interview-signal
+column filled — 0 of 1,488.* Three weeks into v2 the same question came
+due, and the ledger couldn't answer it either. A review of the live system
+found three loops that collected data but never closed:
+
+| loop | what the data showed | change |
+|---|---|---|
+| submission status | 113 of 534 postings stuck in an open state; nothing could force "I submitted" to be written down | the ledger now records only **seen / not seen** — a cursor, not a status machine. Outcomes come from the inbox instead |
+| outreach | 104 message drafts, 28 ever marked sent; of 67 drafted in the last two weeks, 2 went out. Drafts were written before any recipient existed | messages are written **on request**, after the funnel layer is diagnosed (find the hiring manager vs. ask for a referral link) and a named person is found |
+| skill gaps | 70 tailoring passes re-added the same handful of words; the gap report was 144 lines, and 28 words carried contradictory "can / can't" labels written at different dates | the report re-derives each label from the current vocabulary file and prints only what crosses a threshold; frequent words were stored back into the baselines once |
+
+Scout had the opposite problem — too much input. A day's search left
+hundreds of postings for one context to score, and misses crept in. The
+deterministic rules (dedup, blacklist, title level, years, closed or stale
+posts) moved into `bin/scout.py`; only the judgment calls go to parallel
+subagents, ≤30 evidence rows each, and the merge step refuses to proceed
+if any row lacks a verdict. Score 0 is queued automatically; score −1 is
+listed for the human to pick from.
+
+### What the inbox said
+
+`/inbox` reads Gmail read-only, in parallel weekly slices, with three recall
+paths: outcome keywords, a keyword-free sweep of every ATS sender
+(including spam), and LinkedIn messages. The keyword-free sweep added 10
+of the 82 signals found for the first four weeks.
+
+| | count |
+|---|---|
+| applications (approx.) | 250 |
+| rejections | 62 |
+| OAs | 14 — **13 judged automatic** (≤24 h after the confirmation email, or the email itself says every applicant gets it) |
+| interviews / role-specific calls | 5 |
+| passed screening, then stopped by a hard constraint | 1 |
+
+Two readings held up; most others did not survive the sample size:
+
+- **Of the 7 positive outcomes, 4 came through a person** — a referral to
+  the hiring manager, a career-fair conversation, a manager answering
+  outreach, a referral link. The 3 that came from cold applications all
+  ran into the visa question later.
+- **Rejections carry almost no information about direction.** Of 45
+  rejected postings with a fact card on file, none met a strict definition
+  of "clean" (explicit new-grad signal, no stated sponsorship limit,
+  graduation window explicitly compatible). Every rejection was already
+  explained by sponsorship, window, a seniority mismatch the scout had
+  under-scored, or a stale post. Rejections within two days of applying are
+  reported separately and never used as evidence about direction.
+
+Without the automatic-OA filter, "move forward" would have been inflated
+about threefold.
+
+### Hand-off to interview prep
+
+An interview signal opens `interview_hub/actual_interviews/<company>_<role>/`
+with `context.md` (round, time, format, interviewer, official prep
+material, how the opportunity came about, open questions — every line
+tagged with its source), the fact card, and the resume actually sent. The
+hub is a file-driven mock-interview workspace run by a separate voice
+agent; it reads the folder and builds the practice session. Nothing in
+the hub claims access to real company questions.
 
 ## Honest limitations
 
@@ -131,6 +199,11 @@ moved every checkable invariant into scripts.
   own authenticated browser tab, stops on 401/302, never retries, and
   ships no scraped data. See the root DESIGN.md's "On the scraping" for
   the honest discussion; the trade-offs are unchanged.
+- **Inbox classification is model judgment** over email text; the 24-hour
+  automatic-OA heuristic and "role-specific call vs. coffee chat" are
+  calibrated on one person's mailbox. Every row keeps the evidence quote.
+- **Feedback samples are small.** Weekly reports print counts next to
+  every ratio and say "not enough to tell" when that is the answer.
 - v2's live files are Chinese-first. Structure is language-agnostic;
   the docs you're reading cover the design in English.
 
@@ -139,12 +212,16 @@ moved every checkable invariant into scripts.
 ```
 PLAYBOOK.md        the method itself, code-free (Chinese)
 SETUP.md           adopt this: prerequisites, templates, first run (Chinese)
-skills/            four Claude Code skills — scout, saved-jobs-triage,
-                   job-apply, resume-tailor (Chinese; sanitized copies of
-                   the live system, personal constants marked <like this>)
-templates/         skeletons for the four personal files the skills read
-bin/               job.sh (ledger verbs) · tailor_check.sh (resume audit)
-                   · audit.sh (three-way reconciliation)
-browser/           voyager search / JD batch fetch / evidence-row screening
-config/            scout search queries
+skills/            six Claude Code skills — scout, saved-jobs-triage,
+                   job-apply, resume-tailor, inbox, ask (Chinese; sanitized
+                   copies of the live system, personal constants <like this>)
+templates/         skeletons for the personal files the skills read
+bin/               job.sh (ledger verbs) · scout.py (search pipeline) ·
+                   inbox.py (feedback merge + report) · tailor_check.sh
+                   (resume audit) · audit.sh (consistency)
+browser/           voyager search / JD fetch / evidence rows / apply-link
+                   and corner-scan snippets, plus browser pitfalls
+config/            scout queries · third-party blacklist · gaps skip-list
+interview_hub/     file-driven mock-interview workspace (framework only;
+                   actual_interviews/ is filled by /inbox, keep it private)
 ```

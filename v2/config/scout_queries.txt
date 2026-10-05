@@ -1,8 +1,10 @@
 # scout 的 voyager 搜索词，一行一个（# 开头忽略）。改这里即调覆盖面。
-# 地区 geoId 写死美国，见 browser/voyager_search.js 的 opts。
-software engineer graduate
-machine learning engineer graduate
+# 2026-09-24 统一成「岗位名 + new grad」：graduate 后缀召回太多高 yoe 社招（USER-2026-09-24）。
+# 地区 geoId 写死美国，见 browser/voyager_search.js。
+software engineer new grad
+machine learning engineer new grad
 data scientist new grad
 applied scientist new grad
 research engineer new grad
 ai engineer new grad
+forward deployed engineer new grad

@@ -90,3 +90,11 @@ window.linkedin.scrapeQuery = async function (kw, opts = {}) {
   }
   return { kw, fetched: out.length, stop, cards: out };
 };
+
+// 通用落盘（同 jd_screen.js）：window.linkedin.dump(window.__cards, 'scout_cards_<date>.jsonl')
+window.linkedin.dump = window.linkedin.dump || function (arr, filename) {
+  const jsonl = arr.map((x) => JSON.stringify(x)).join('\n');
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([jsonl])), download: filename });
+  document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 1500);
+  return { count: arr.length, filename };
+};

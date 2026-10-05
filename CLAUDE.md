@@ -1,9 +1,11 @@
 # applyloop — two generations of a job-application system
 
-**v2 is current** and lives in `v2/` as a sanitized public copy: four
-skills (scout / saved-jobs-triage / job-apply / resume-tailor), ledger
-verbs in `v2/bin/job.sh`, browser snippets, and templates for the four
-personal files the skills read. To work on or adopt v2, start from
+**v2 is current** and lives in `v2/` as a sanitized public copy of a
+closed loop: six skills (scout / saved-jobs-triage / job-apply /
+resume-tailor / inbox / ask), ledger verbs in `v2/bin/job.sh`, the scout
+pipeline (`v2/bin/scout.py`), inbox feedback (`v2/bin/inbox.py`), browser
+snippets, templates for the personal files the skills read, and a
+mock-interview hub framework (`v2/interview_hub/`). To work on or adopt v2, start from
 `v2/SETUP.md`; the design rationale is `v2/README.md`.
 
 On the author's machine the *live* v2 system (with real ledger and

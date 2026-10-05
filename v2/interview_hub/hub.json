@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "defaults": {
+    "mode": "lc",
+    "interview_language": "English",
+    "coding_language": "Python",
+    "debrief_language": "Chinese",
+    "duration_minutes": 45,
+    "difficulty": "Medium",
+    "style": "realistic",
+    "hints": "on_request",
+    "automatic_code_edits": false
+  },
+  "modes": {
+    "lc": {
+      "status": "ready",
+      "instructions": "modes/lc/MODE.md"
+    },
+    "dl": {
+      "status": "planned",
+      "instructions": "modes/dl/MODE.md"
+    },
+    "bq": {
+      "status": "ready",
+      "instructions": "modes/bq/MODE.md"
+    },
+    "system-design": {
+      "status": "planned",
+      "instructions": "modes/system-design/MODE.md"
+    },
+    "company": {
+      "status": "planned",
+      "instructions": "modes/company/MODE.md"
+    }
+  }
+}

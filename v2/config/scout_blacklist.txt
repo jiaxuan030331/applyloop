@@ -1,0 +1,105 @@
+# scout 黑名单：发帖方名命中即丢（大小写不敏感子串匹配）。确认一个第三方就加一行。
+# 可疑但未确认的（名含 talent/jobs/hire、疑似代发）先查实再加，查不实照存标异常。
+# —— 永不投（填你自己的）
+# —— 确认第三方：中介 / 培训派遣 / 众包标注 / 转贴 marketplace
+beaconfire
+jobright
+synergisticit
+teksystems
+emonics
+brotherstech
+revature
+taskverse
+sundayy
+netrolynx
+blacksmith agency
+gigfinder
+kforce
+apex systems
+experis
+insight global
+inspyr
+adecco
+motion recruitment
+peterson technology
+primary talent
+ptr global
+ursus
+eliassen
+consultnet
+enhance it
+7th sky
+kareer basycs
+remotehunter
+jobgether
+recruiting from scratch
+hyrrise
+vetjobs
+intratek
+raas infotek
+vysystems
+galent
+pasona
+moonwise
+cogent infotech
+rk infotech
+signify technology
+ttn talent
+alexander chapman
+landing point
+open systems technologies
+people in ai
+fonzi
+micro1
+talenthop            # 2026-09-22 查实：招聘平台，Scam Detector 55.8
+jack & jill          # 2026-09-22 查实：AI 招聘 marketplace（jackandjill.ai）
+jack and jill
+alignerr
+opentrain
+jiangsu surun
+Randstad
+BTI Solutions
+# 2026-09-28 scout 4d 查实/高信心第三方
+wiraa
+yara ai
+dataannotation
+synthires
+growx
+divine talent
+brooksource
+aditi consulting
+stanley david
+envision technology solutions
+centraprise
+spectraforce
+system one
+kelly
+tekwissen
+amerit consulting
+mitchell martin
+digital waffle
+gravitas recruitment
+eleven recruiting
+bepc
+placement group
+the ai training company
+crossing hurdles
+torentify
+nextjobz
+a hiring company
+indotronix
+high aim classes
+waterstone human capital
+quantum world technologies
+# 2026-10-03 scout 1d 查实新增
+dahl consulting
+robert half
+turing
+burgeon it
+tech consulting
+green key resources
+gbit
+global bridge infotech
+gyga force
+winaxis
+infinite computer solutions
